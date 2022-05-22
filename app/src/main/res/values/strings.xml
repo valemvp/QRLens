@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">QRLens</string>
+    <string name="todo" />
+    <string name="version">Version 1.0</string>
+    <string name="error">Error</string>
+    <string name="no_valido">El código QR no es válido para la aplicación</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="request">Permiso requerido</string>
+    <string name="req_msg">La aplicación necesita acceder a la cámara para leer los códigos QR.</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="perm_negado">Permiso para acceder a la cámara no se ha concedido</string>
+    <string name="email">EMAIL</string>
+    <string name="vcard">V-CARD</string>
+    <string name="sms">SMS</string>
+    <string name="creador">por Valeria Monserrat Villaseñor Peña</string>
+</resources>
