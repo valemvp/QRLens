@@ -8,6 +8,7 @@ import android.content.res.TypedArray
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -57,24 +58,17 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
         Log.d("QR_LEIDO", scanResult!!)
 
         if (scanResult.isNotEmpty()){
-            val opt = scanResult.toString().split("\n")
             if(scanResult.toString().startsWith("MATMSG")){
                 Toast.makeText(this, getString(R.string.email), Toast.LENGTH_SHORT).show();
-                val mailElements = scanResult.split(":").toTypedArray()
-                val mail = mailElements[2].split(";").toTypedArray()
-                val sub = mailElements[3].split(";").toTypedArray()
-                val txt = mailElements[4].split(";").toTypedArray()
-                val i = Intent(Intent.ACTION_SENDTO)
-                i.setType("*/*")
-                i.putExtra(Intent.EXTRA_EMAIL, mail[0])
-                i.putExtra(Intent.EXTRA_SUBJECT, sub[0])
-                i.putExtra(Intent.EXTRA_TEXT, mailElements[0])
-                i.setData(Uri.parse("mailto:"))
+                val i = mailElem(scanResult)
                 startActivity(i)
                 finish()
+
             } else if(scanResult.toString().startsWith("BEGIN")){
-                //Toast.makeText(this, scanResult.toString(), Toast.LENGTH_LONG).show();
                 Toast.makeText(this, getString(R.string.vcard), Toast.LENGTH_SHORT).show();
+                val i = vCardElem(scanResult)
+                startActivity(i)
+                finish()
 
             } else if(scanResult.toString().startsWith("SMSTO")){
                 Toast.makeText(this, getString(R.string.sms), Toast.LENGTH_SHORT).show();
@@ -84,6 +78,7 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
                 i.setData(Uri.parse("smsto:" + smsElements[1]))
                 startActivity(i)
                 finish()
+
             } else{
                 Toast.makeText(this, scanResult.toString(), Toast.LENGTH_SHORT).show();
                 try{
@@ -108,6 +103,36 @@ class QR : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
     }
 
+    fun mailElem(scanResult: CharSequence): Intent{
+        val mailElements = scanResult.split(":").toTypedArray()
+        val mail = mailElements[2].split(";").toTypedArray()
+        val sub = mailElements[3].split(";").toTypedArray()
+        val txt = mailElements[4].split(";").toTypedArray()
+        val i = Intent(Intent.ACTION_SENDTO)
+        i.setType("*/*")
+        i.setData(Uri.parse("mailto:"))
+        i.putExtra(Intent.EXTRA_EMAIL, mail)
+        i.putExtra(Intent.EXTRA_SUBJECT, sub[0])
+        i.putExtra(Intent.EXTRA_TEXT, txt[0])
+
+        return i
+    }
+
+    fun vCardElem(scanResult: CharSequence): Intent{
+        val vCardElements = scanResult.split("\n").toTypedArray()
+        val name = vCardElements[3].split(":").toTypedArray()
+        val org = vCardElements[4].split(":").toTypedArray()
+        val num = vCardElements[8].split(":").toTypedArray()
+        val mail = vCardElements[10].split(":").toTypedArray()
+        val i = Intent(Intent.ACTION_INSERT)
+        i.setType(ContactsContract.Contacts.CONTENT_TYPE)
+        i.putExtra(ContactsContract.Intents.Insert.NAME, name[1])
+        i.putExtra(ContactsContract.Intents.Insert.PHONE,num[1])
+        i.putExtra(ContactsContract.Intents.Insert.EMAIL,mail[1])
+        i.putExtra(ContactsContract.Intents.Insert.COMPANY,org[1])
+
+        return i
+    }
 
     override fun onResume() {
         super.onResume()
